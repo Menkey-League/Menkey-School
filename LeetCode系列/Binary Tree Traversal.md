@@ -1,5 +1,12 @@
 # LeetCode-- Binary Tree Traversal
 
+
+> ### Binary Tree Preorder Traversal
+
+> ### Binary Tree Inorder Traversal
+
+> ### Binary Tree Postorder Traversal
+
 LeetCode 上二叉树的节点定义如下:  
 
 ```// 树的节点 struct TreeNode {      int val;      TreeNode *left;      TreeNode *right;      TreeNode(int x) : val(x), left(nullptr), right(nullptr) { }};
@@ -48,38 +55,53 @@ void postOrder_traverse_recur(BiTree T) {
 }
 ```
 
+## 栈 算法
 
-## Binary Tree Preorder Traversal
+时间复杂度 O(n),空间复杂度 O(n)
+
+```// LeetCode, Binary Tree Preorder Traversal 
+class Solution {public:      vector<int> preorderTraversal(TreeNode *root) {          vector<int> result;          const TreeNode *p;          stack<const TreeNode *> s;          p = root;          if (p != nullptr) s.push(p);          while (!s.empty()) {              p = s.top();              s.pop();              result.push_back(p->val);              if (p->right != nullptr) s.push(p->right);              if (p->left != nullptr) s.push(p->left);          }          return result;      }};
+
+```
+
+```
+// LeetCode, Binary Tree Inorder Traversal 
+class Solution {public:      vector<int> inorderTraversal(TreeNode *root) {          vector<int> result;          const TreeNode *p = root;          stack<const TreeNode *> s;          while (!s.empty() || p != nullptr) {              if (p != nullptr) {s.push(p);                  p = p->left;              } else {                  p = s.top();                  s.pop();                  result.push_back(p->val);                  p = p->right;} }          return result;      }};
+```
 
 
-
-## Binary Tree Inorder Traversal
-
-
-
-## Binary Tree Postorder Traversal
-
-
+```
+// LeetCode, Binary Tree Postorder Traversal
+class Solution {public:vector<int> postorderTraversal(TreeNode *root) { vector<int> result;/* p,正在访问的结点,q,刚刚访问过的结点 */ const TreeNode *p, *q;          stack<const TreeNode *> s;￼
+5.1 二叉树的遍历 91￼p = root;do {while (p != nullptr) { /* 往左下走 */s.push(p);p = p->left; }        q = nullptr;        while (!s.empty()) {p = s.top();s.pop();/* 右孩子不存在或已被访问,访问之 */ if (p->right == q) {                result.push_back(p->val);q = p; /* 保存刚访问过的结点 */ } else {/* 当前结点不能访问,需第二次进栈 */ s.push(p);/* 先处理右子树 */p = p->right;break; }        }    } while (!s.empty());    return result;}};
+```
 
 ## Morris算法
 
+时间复杂度 O(n),空间复杂度 O(1)
+
 参考：[http://www.tuicool.com/articles/zA7NJbj](http://www.tuicool.com/articles/zA7NJbj)
+
+算法伪码（Morris InOrder) :
+
+```
+while 节点非空
+   if 当前节点没有左子树
+     访问该节点
+     转向右节点
+   else
+     找到左子树的最右节点
+     	if 最右子节点指空
+     		最右节点的右指针指向根
+     		转向左子树节点
+     	else //最右子节点指根
+     		消除指根指针
+     		根节点右移
+
+```
 
 ![bitree_mirros](./img/leetcode_bitree_morris.jpg)
 
-```
-算法伪码：
-
-MorrisInOrder()：
-while 节点非空
-   如果当前节点没有左子树
-     访问该节点
-     转向右节点
-   否则
-     找到左子树的最右节点，且使最右节点的右指针指向当前节点
-     转向左子树节点
-
-```
 
 C++实现：
 
