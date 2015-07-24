@@ -64,11 +64,23 @@ class Solution {public:      vector<int> preorderTraversal(TreeNode *root) { 
 
 ```
 
+
 ```
 // LeetCode, Binary Tree Inorder Traversal 
 class Solution {public:      vector<int> inorderTraversal(TreeNode *root) {          vector<int> result;          const TreeNode *p = root;          stack<const TreeNode *> s;          while (!s.empty() || p != nullptr) {              if (p != nullptr) {s.push(p);                  p = p->left;              } else {                  p = s.top();                  s.pop();                  result.push_back(p->val);                  p = p->right;} }          return result;      }};
 ```
 
+后序遍历
+在LeetCode难度是Hard.
+
+思路： 
+栈算法步骤：  
+1. 将根节点一直最左节点 循环压入栈中   
+2. 取栈顶节点（此时是最底左节点），判断其右孩子是否存在或者等于临时节点  
+3. 如果是，则打印该节点值，并将该节点赋予临时节点，继续内循环  
+4. 如果不是，将其右孩子入栈，跳出第一层内循环  
+5. 跳到外循环，将该有孩子节点当做根节点，重复第1步
+			
 
 ```
 // LeetCode, Binary Tree Postorder Traversal
