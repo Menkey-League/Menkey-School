@@ -26,3 +26,10 @@ dispatch_async(dispatch_get_global_queue(0, 0),^{
 		NSLog(@"Completed in %f seconds",[endTime timeIntervalSinceDate:startTime];
 	});
 ```
+
+GCD 串行队列与并发队列
+GCD 延时执行
+GCD 线程组
+GCD 定时器
+GCD 信号量
+GCD 综合使用示例
