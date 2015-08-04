@@ -166,4 +166,33 @@ new Thread() {
 如有什么观点和问题，欢迎讨论和指正。
 
 
+另外补充
+
+block的数据结构和runtime是开源的,苹果提供了在线的代码查看方式，其中包含了很多示例和文档说明
+
+在Object-C中如何写Block
+
+本地变量:  
+`returnType (^blockName)(parameterTypes) = ^returnType(parameters){...};`
+
+Property:  
+`@property (nonatomic, copy) returnType (^blockName)(parameterTypes);`
+
+Method Parameter:  
+`-(void)someMethodBlock:(retrunType (^)(parameterTypes))blockName;`
+
+Argument to A Method Call:  
+`[someObject someMethodBlock:^returnType (parameters) {...}];`
+
+Typedef:
+`typedef returnType (^TypeName)(parameterTypes);`
+`TypeName blockName = ^returnType(parameters) {...};`
+
+
+
+参考：
+
+[http://fuckingblocksyntax.com/](http://fuckingblocksyntax.com/)
+
+
   
