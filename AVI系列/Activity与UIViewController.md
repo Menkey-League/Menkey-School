@@ -1,7 +1,138 @@
-#【对比Android与IOS开发系列】
-# ——Activity与UIViewController
+#【iOS-Android开发对比】之 APP入口
 
 ![image](./img/avi_1.png)
+
+[图片 Android vs iOS]
+
+提纲
+
+1. 对比分析iOS,Android的入口，
+
+2. iOS,Android的界面单元
+
+3. 为什么要有那样的生命周期
+
+4. 继承和抽象类怎么写，例如工厂模式
+
+5. 对象的强弱，iOS的特色
+
+
+
+
+
+## 程序入口 (Entry Point)
+<br/>
+**#首先来看iOS应用的入口：**
+
+```
+int main(int argc, char * argv[])
+{
+    @autoreleasepool {
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+    } 
+}
+```
+和所有C程序一样，main函数是Objective-C程序的入口。虽然这个main方法返回 int，但它并不会真正返回。它会一直存在于内存中，直到用户或者系统将其强制终止.
+
+上面的`UIApplicationMain`其来自 `UIKit`，是一个非常重要的函数。
+
+说一下参数，前两个参数大家都懂。  
+
+第三个参数，是UIApplication类名或者是其子类名，如果是nil，则默认使用UIApplication类名。  
+
+第四个参数，是AppDelegate类作为应用的委托对象，用来监听应用生命周期相关的委托方法。
+
+从界面角度，程序启动的过程如下：
+
+1. 程序入口main函数创建UIApplication实例和UIApplication代理实例。
+
+2. 在UIApplication代理实例中重写启动方法，设置Root ViewController。
+
+3. 在Root ViewController中添加控件，实现应用程序界面。
+
+这个`UIApplication`的核心作用是提供了iOS程序运行期间的控制和协作工作。它创建了App的几个核心对象如： UIApplicationDelegate UIWindow, UIView，来处理一下过程：
+
+1. 从可用Storyboard文件加载用户界面
+
+2. 调用AppDelegate自定义代码来做一些初始化设置
+
+3. 将app放入Main Run Loop环境中来响应和处理与用户交互产生的事件
+
+
+这个UIApplication对象在启动时就设置 `Main Run Loop`,并且使用它来处理事件和更新基于view的界面, Main Run Loop就是应用程序的主线程。
+
+
+[图片 iOS, swift, Android举牌]
+
+<br/>
+**说说Swift的入口：**
+
+在Swift语言当中，编译器不会再去寻找 main 函数作为程序的入口，而是一个`main.swift`文件.  
+该文件中的第一行代码就默认为是程序的入口, 可以添加如下代码：
+
+```
+UIApplicationMain(C_ARGC, C_ARGV, nil, 
+    NSStringFromClass(AppDelegate))
+```
+没错，就是之前提到的`UIApplicationMain`。这里 C_ARGC, C_ARGV 全局变量 就是main函数中的
+argc, argv。
+
+另外，可以在Swift文件中添加 `@UIApplicationMain` 标签注明项目入口。这样做会让编译器忽略main.swift入口文件，而将标注有@UIApplicationMain标签的文件当做入口文件。
+
+
+<br/>
+**#再来看看Android的：**
+
+**Android程序你找不到main方法。因为，确实没有。**
+
+怎么可能没有？java不是也有main方法嘛，Android怎么会没有。
+
+对于这个问题，有很多解释。 
+
+Stackoverflow上有解释说没有main是因为不需要main,系统生成activity并调用其方法,应用默认启动已经把main代替了,因此不需要用main方法。
+
+那么程序的入口在哪里？ 答案是`Application`.
+
+每个Android程序的包中，都有一个manifest文件声明了它的组件，我们可以看到如下代码：
+
+```
+<manifest  ...
+	<application  ...
+		<activity android:name=".MainActivity" android:label="@string/app_name"> 
+            <intent-filter> 
+                <action android:name="android.intent.action.MAIN" /> 
+                <category android:name="android.intent.category.LAUNCHER" /> 
+            </intent-filter> 
+		</activity> 
+	</application>
+</manifest>
+```
+
+在这个xml写成的manifest文件中，`<application/>` 标签在最外层。其中，这个标记了android.intent.category.LAUNCHER 的 `<activity/>` 就是程序启动的默认界面，而启动这个activity的Application的onCreate()，就是Android真正的入口。
+
+
+**#深入一下：**
+
+
+继承关系：
+
+```
+java.lang.Object
+   ↳	android.content.Context
+ 	   ↳	android.content.ContextWrapper
+ 	 	   ↳	android.app.Application
+```
+
+
+
+
+
+
+-------
+
+Android的最底层是`Linux Kernel`, iOS是`XNU Kernel`,它们有什么区别呢？
+
+
 
 ## Activity与UIViewController
 
@@ -123,11 +254,66 @@ Java实际上任何对象都是直接或间接继承自Object，写extends Objec
 
 
 
+## 关于继承和抽象类
+
+
+
+## App启动的堆栈原理
+
+
+
+## 如何写工厂模式
+
+
+## App的启动程序入口
+
 --
-后记  
-暂时写这么多，随后再补充。  
-这篇只是这个系列的第一篇，随后再写更多。  
+  
 文章和代码一样，也需要不断去梳理，不断迭代。  
 
-[](http://www.cnblogs.com/lwbqqyumidi/p/4151833.html)
+**参考**
+
+iOS
+
+[http://www.jianshu.com/p/aa50e5350852](http://www.jianshu.com/p/aa50e5350852)
+
+[http://www.cnblogs.com/ydhliphonedev/archive/2012/07/30/2615801.html](http://www.cnblogs.com/ydhliphonedev/archive/2012/07/30/2615801.html)
+
+[http://swifter.tips/uiapplicationmain/](http://swifter.tips/uiapplicationmain/)
+
+[http://blog.ibireme.com/2015/05/18/runloop/](http://blog.ibireme.com/2015/05/18/runloop/)
+
+[http://swifter.tips/uiapplicationmain/](http://swifter.tips/uiapplicationmain/)
+
+Android
+
+[http://www.cnblogs.com/lwbqqyumidi/p/4151833.html](http://www.cnblogs.com/lwbqqyumidi/p/4151833.html)
+
+[https://sites.google.com/site/terrylai14/home/android-context-yuan-li](https://sites.google.com/site/terrylai14/home/android-context-yuan-li)
+
+[http://blog.csdn.net/chenzheng_java/article/details/6215986](http://blog.csdn.net/chenzheng_java/article/details/6215986)
+
+[http://blog.csdn.net/chenzheng_java/article/details/6216621](http://blog.csdn.net/chenzheng_java/article/details/6216621)
+
+
+## 其他
+
+Android 程序入口 application onCreate()后都做了什么，这里有个歪果仁打印出了onCreate后堆栈显示的日志：
+
+```
+MainActivity.onCreate(Bundle) line: 12  
+Instrumentation.callActivityOnCreate(Activity, Bundle) line: 1047   
+ActivityThread.performLaunchActivity(ActivityThread$ActivityRecord, Intent) line: 2627  
+ActivityThread.handleLaunchActivity(ActivityThread$ActivityRecord, Intent) line: 2679   
+ActivityThread.access$2300(ActivityThread, ActivityThread$ActivityRecord, Intent) line: 125 
+ActivityThread$H.handleMessage(Message) line: 2033  
+ActivityThread$H(Handler).dispatchMessage(Message) line: 99 
+Looper.loop() line: 123 
+ActivityThread.main(String[]) line: 4627    
+Method.invokeNative(Object, Object[], Class, Class[], Class, int, boolean) line: not available [native method]  
+Method.invoke(Object, Object...) line: 521  
+ZygoteInit$MethodAndArgsCaller.run() line: 868  
+ZygoteInit.main(String[]) line: 626 
+NativeStart.main(String[]) line: not available [native method] 
+```
 
