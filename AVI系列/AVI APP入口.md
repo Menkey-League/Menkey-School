@@ -4,6 +4,10 @@
 
 [图片 Android vs iOS]
 
+>作者：TindleWei   
+>图片来自：TindleWei 画的  
+>转载请说明出处：
+
 提纲
 
 1. 对比分析iOS,Android的入口，
@@ -15,8 +19,6 @@
 4. 继承和抽象类怎么写，例如工厂模式
 
 5. 对象的强弱，iOS的特色
-
-
 
 
 
@@ -42,21 +44,15 @@ int main(int argc, char * argv[])
 
 第四个参数，是AppDelegate类作为应用的委托对象，用来监听应用生命周期相关的委托方法。
 
-从界面角度，程序启动的过程如下：
+这个`UIApplication`的核心作用是提供了iOS程序运行期间的控制和协作工作。它创建了App的几个核心对象如： UIApplicationDelegate UIWindow, UIView，来处理一下过程：
 
 1. 程序入口main函数创建UIApplication实例和UIApplication代理实例。
 
-2. 在UIApplication代理实例中重写启动方法，设置Root ViewController。
+2. 从可用Storyboard文件加载用户界面
 
-3. 在Root ViewController中添加控件，实现应用程序界面。
+3. 调用AppDelegate自定义代码来做一些初始化设置
 
-这个`UIApplication`的核心作用是提供了iOS程序运行期间的控制和协作工作。它创建了App的几个核心对象如： UIApplicationDelegate UIWindow, UIView，来处理一下过程：
-
-1. 从可用Storyboard文件加载用户界面
-
-2. 调用AppDelegate自定义代码来做一些初始化设置
-
-3. 将app放入Main Run Loop环境中来响应和处理与用户交互产生的事件
+4. 将app放入Main Run Loop环境中来响应和处理与用户交互产生的事件
 
 
 这个UIApplication对象在启动时就设置 `Main Run Loop`,并且使用它来处理事件和更新基于view的界面, Main Run Loop就是应用程序的主线程。
@@ -83,15 +79,15 @@ argc, argv。
 <br/>
 **#再来看看Android的：**
 
-**Android程序你找不到main方法。因为，确实没有。**
+**Android程序你找不到显式的main方法**
 
-怎么可能没有？java不是也有main方法嘛，Android怎么会没有。
+尽管java也有main方法，可Android似乎却找不到main。
 
 对于这个问题，有很多解释。 
 
 Stackoverflow上有解释说没有main是因为不需要main,系统生成activity并调用其方法,应用默认启动已经把main代替了,因此不需要用main方法。
 
-那么程序的入口在哪里？ 答案是`Application`.
+那么程序的入口在哪里？ 我们从`Application`开始看.
 
 每个Android程序的包中，都有一个manifest文件声明了它的组件，我们可以看到如下代码：
 
@@ -108,11 +104,28 @@ Stackoverflow上有解释说没有main是因为不需要main,系统生成activit
 </manifest>
 ```
 
-在这个xml写成的manifest文件中，`<application/>` 标签在最外层。其中，这个标记了android.intent.category.LAUNCHER 的 `<activity/>` 就是程序启动的默认界面，而启动这个activity的Application的onCreate()，就是Android真正的入口。
+在这个xml写成的manifest文件中，`<application/>` 标签在最外层。其中，这个标记了android.intent.category.LAUNCHER 的 `<activity/>` 就是程序启动的默认界面。但是它们不是真正的入口。
 
+**Android应用程序的真正入口为 `ActivityThread.main`方法**
+
+这是一个隐式的入口，代码做了一定简化如下：
+
+```
+public static void main(String[] args) {  
+     //一些检测预设值...  
+     Looper.prepareMainLooper();// 创建消息循环Looper  
+     ActivityThread thread = new ActivityThread();  
+     thread.attach(false);  
+     if (sMainThreadHandler == null) {  
+         sMainThreadHandler = thread.getHandler(); // UI线程的Handler  
+     }  
+     AsyncTask.init();  
+     Looper.loop();   // 执行消息循环  
+     throw new RuntimeException("Main thread loop unexpectedly exited");  
+ }  
+```
 
 **#深入一下：**
-
 
 继承关系：
 
@@ -124,20 +137,75 @@ java.lang.Object
 ```
 
 
-
-
-
-
 -------
 
-Android的最底层是`Linux Kernel`, iOS是`XNU Kernel`,它们有什么区别呢？
 
 
 
-## Activity与UIViewController
+
+## 界面元素
+
+下来说最基本的界面元素，Android是`Activity`,iOS是 `UIViewController`.
+
+#### 先介绍Android 
+
+Activity是怎么在屏幕上显示出来的?
+
+简单来说，Activity中调用setContentView后，将从系统中获取一块Surface从而的到一个画布Canvas,接着调用View的draw开始绘图。
+
+具体绝对非常复杂:  
+从Activity的最初启动开始，在`ActivityThread`中，有个函数`handleLaunchActivity`,它就是创建Activity的地方。
+
+```
+private final void handleLaunchActivity(ActivityRecord r, Intent customIntent) {
+       //①performLaunchActivity返回一个Activity
+       Activity a = performLaunchActivity(r, customIntent);
+       ...
+       
+       //②调用handleResumeActivity
+       handleResumeActivity(r.token, false, r.isForward);
+       ...
+       }
+```
+
+里面有两个关键函数 ：
+
++ `performLaunchActivity`会根据Java反射以Activity类名创建一个Activity,并调用Activity的onCreate()方法。
+
++ `handleResumeActivity`使用WindowManager调用ViewRoot, 这个ViewRoot是显示系统中最为关键，他继承自Handler,实现了一些View的接口。  
+在ViewRoot中,有个Surface是一个Java/JNI对象,它相当UI的画布，它会生成一个Canvas,从而实现View的draw方法。
+最后ViewRoot会调用requestLayout()方法来显示UI。
+
+这里画个图来说明下：
+
+
+---------
+
+### 接下来讲关于iOS的
+
+
+
+
+
 
 
 Android的Activity和Fragment是最基本的界面组成，而IOS是UIViewController。几乎所有的View和空间都会放在Activity和UIViewController中。
+
+要说iOS的界面单元，有 UIScreen, UIView, UIWindow, UIViewController.
+
+Android应用程序窗口的UI渲染过程可以分为测量、布局和绘制三个阶段。
+
+Measure()->Layout()->Draw()
+
+递归（深度优先）确定所有视图的大小（高、宽）
+布局：递归（深度优先）确定所有视图的位置（左上角坐标）
+绘制：在画布canvas上绘制应用程序窗口所有的视图
+
+测量、布局没有太多要说的，这里要着重说一下绘制。Android目前有两种绘制模型：基于软件的绘制模型和硬件加速的绘制模型（从Android 3.0开始全面支持）。
+ 
+在基于软件的绘制模型下，CPU主导绘图，视图按照两个步骤绘制：
+1.      让View层次结构失效
+2.      绘制View层次结构
 
 在之上有不少扩展的:  
 
@@ -149,9 +217,14 @@ Android的Activity和Fragment是最基本的界面组成，而IOS是UIViewContro
   
 `Android:` `Activity->ContextThemeWrapper->ContextWrapper->Context` 
  
-`IOS:` `UIViewController->UIResponder->NSObject`
+`iOS:` `UIViewController->UIResponder->NSObject`
 
-IOS几乎所有的基类都是NSObject，Android中也有Object,一般作为Model层对象的基类。
+iOS几乎所有的基类都是NSObject。  
+Android中也有Object,Object一般作为Model层对象的基类。
+
+Java实际上任何对象都是直接或间接继承自Object，写extends Object和不写extends是等价的。
+因此 Android和iOS的对象, 本质上都是从顶级的Object继承来的。  
+*Amazing~*
 
 ## 生命周期
 
@@ -295,6 +368,9 @@ Android
 
 [http://blog.csdn.net/chenzheng_java/article/details/6216621](http://blog.csdn.net/chenzheng_java/article/details/6216621)
 
+[http://blog.csdn.net/bboyfeiyu/article/details/38555547](http://blog.csdn.net/bboyfeiyu/article/details/38555547)
+
+[http://blog.csdn.net/innost/article/details/47208337](http://blog.csdn.net/innost/article/details/47208337)
 
 ## 其他
 
@@ -317,3 +393,4 @@ ZygoteInit.main(String[]) line: 626
 NativeStart.main(String[]) line: not available [native method] 
 ```
 
+Android的最底层是`Linux Kernel`, iOS是`XNU Kernel`,它们有什么区别呢？

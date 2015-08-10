@@ -111,6 +111,8 @@ public final class Message implements Parcelable {
 
 三种方式的优缺点介绍：
 
+前面使用NSThread很难控制线程的执行顺序，但是使用NSOperation就容易多了
+
 1）NSThread:
 
 优点：NSThread 比其他两个轻量级   
