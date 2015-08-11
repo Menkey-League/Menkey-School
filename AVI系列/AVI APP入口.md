@@ -5,8 +5,9 @@
 [图片 Android vs iOS]
 
 >作者：TindleWei   
->图片来自：TindleWei 画的  
->转载请说明出处：
+>图片来自：TindleWei 画的   
+>这些都在我的 [github]() 上了   
+>转载请说明出处
 
 提纲
 
@@ -14,11 +15,11 @@
 
 2. iOS,Android的界面单元
 
-3. 为什么要有那样的生命周期
+3. 生命周期的异同
 
 4. 继承和抽象类怎么写，例如工厂模式
 
-5. 对象的强弱，iOS的特色
+5. 数据对象怎么写
 
 
 
@@ -141,8 +142,6 @@ java.lang.Object
 
 
 
-
-
 ## 界面元素
 
 下来说最基本的界面元素，Android是`Activity`,iOS是 `UIViewController`.
@@ -176,42 +175,29 @@ private final void handleLaunchActivity(ActivityRecord r, Intent customIntent) {
 在ViewRoot中,有个Surface是一个Java/JNI对象,它相当UI的画布，它会生成一个Canvas,从而实现View的draw方法。
 最后ViewRoot会调用requestLayout()方法来显示UI。
 
-这里画个图来说明下：
-
-
 ---------
 
 ### 接下来讲关于iOS的
 
+因为iOS的闭源系统没办法直接了解内部构造,所以说说它的基本界面元素。
+
+iOS的基本界面单元，有 UIScreen, UIView, UIWindow, UIViewController.
+NSObject<-UIResponder<-UIView,UIWindow是继承自UIView,UIScreen继承自UIResponder.
+
+这里补充一下，keyWindow. UIWindow可以通过makeKeyAndVisible使一个window变成keyWindow,从而可以接收键盘以及非触摸类的消息事件。
+
+这里的UIWindow也是分层级的，UIWindowLevel.
+
+如果使用了storyboard,创建UIWindow的过程是自动完成的。
+
+iOS的界面显示就是 县创建一个UIWindow,再在UIWindow上叠加多个View.
 
 
-
-
-
-
-Android的Activity和Fragment是最基本的界面组成，而IOS是UIViewController。几乎所有的View和空间都会放在Activity和UIViewController中。
-
-要说iOS的界面单元，有 UIScreen, UIView, UIWindow, UIViewController.
-
-Android应用程序窗口的UI渲染过程可以分为测量、布局和绘制三个阶段。
-
-Measure()->Layout()->Draw()
-
-递归（深度优先）确定所有视图的大小（高、宽）
-布局：递归（深度优先）确定所有视图的位置（左上角坐标）
-绘制：在画布canvas上绘制应用程序窗口所有的视图
-
-测量、布局没有太多要说的，这里要着重说一下绘制。Android目前有两种绘制模型：基于软件的绘制模型和硬件加速的绘制模型（从Android 3.0开始全面支持）。
- 
-在基于软件的绘制模型下，CPU主导绘图，视图按照两个步骤绘制：
-1.      让View层次结构失效
-2.      绘制View层次结构
-
-在之上有不少扩展的:  
+对于我们看到的界面`Activity`和`UIViewController`在之上有不少扩展的:  
 
 `Android:`  FragmentActivity, AppCompatActivity
 
-`IOS:` UITableViewController, UICollectionViewController
+`iOS:` UITableViewController, UICollectionViewController
 
 我们对比一下继承关系:
   
@@ -232,7 +218,7 @@ Java实际上任何对象都是直接或间接继承自Object，写extends Objec
 
 Android的Activity, `onCreate()` 中初始化操作, `onResume()`中可以加一些改变界面和状态的操作;
 
-IOS的UIViewController, `-viewDidLoad ` 中初始化操作, `-viewWillAppear` 中可以加一些改变界面和状态的操作;
+iOS的UIViewController, `-viewDidLoad ` 中初始化操作, `-viewWillAppear` 中可以加一些改变界面和状态的操作;
 
 对比一下：
 
@@ -240,14 +226,14 @@ IOS的UIViewController, `-viewDidLoad ` 中初始化操作, `-viewWillAppear` �
 
 > `UIViewController:` -viewDidLoad --> -viewWillAppear --> -viewDidAppear --> `运行态` --> -viewWillDisappear --> -viewDidDisappear
 
-这里补充一个Android的  
+这里补充Android的Fragment  
 > `Fragment:`** *onAttach()* --> onCreate() --> *onCreateView()* --> *onActivityCreate()* --> onStart() --> onResume( )--> `运行态` --> onPause() --> onStop() --> *onDestroyView()* --> onDestroy() --> *onDetach()*
 
-Android与IOS都使用 **堆栈** 的数据结构 存储Activity和UIViewController.
+Android与iOS都使用 **堆栈** 的数据结构 存储Activity和UIViewController.
 
 `Android`关于Activity的堆栈, 可以搜索`taskAffinity`和`launchMode`。同一应用所有Activity具有相同的亲和性(taskAffinity)，可通过Itent FLAG设置，也可在AndroidManifest中设置.
 
-`IOS`中的UINavigationController通过堆栈来UIViewController.
+`iOS`中的UINavigationController通过堆栈来UIViewController.
 
 
 
@@ -255,11 +241,11 @@ Android与IOS都使用 **堆栈** 的数据结构 存储Activity和UIViewControl
 
 `Android:` Activity可以使用Intent，Fragment使用Bundle。 对于界面回调传值，通过startActivityForResult()启动和onActivityResult()接收。
 
-`IOS:` 在初始化UIViewController对象时，直接给对象中的变量赋值。 对于界面回调传值，可以自定义接口(Delegate),也可以使用通知(Notification)
+`iOS:` 在初始化UIViewController对象时，直接给对象中的变量赋值。 对于界面回调传值，可以自定义接口(Delegate),也可以使用通知(Notification)
 
 
 
-## 结构类型
+## 封装与继承
  
 <h4>类代码</h4>
 
@@ -269,14 +255,32 @@ A.java Class A extends B implements C
 ```
 
 ```
-//IOS
+//iOS
 A.h @interface A : B 
 A.m @implementation A <C>
 ```
-		
---
-<h4>强引用和弱引用</h4>
 
+**如果我要写一个工厂模式**
+
+Android
+
+
+interface Factory{
+ 
+}
+
+class Product{
+
+}
+
+
+interface A extends 
+
+		
+----
+
+
+## 引用类型
 
 Android:  
 >有四种引用类型，强引用(StrongReference),软引用(SoftReference),弱引用(WeakReference),虚引用(Phantom Reference)。  
