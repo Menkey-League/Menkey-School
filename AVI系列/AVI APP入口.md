@@ -19,9 +19,13 @@
 
 4. 继承和抽象类怎么写，例如工厂模式
 
+<<<<<<< Updated upstream
 5. 数据对象怎么写
 
 
+=======
+5. 对象的强弱引用
+>>>>>>> Stashed changes
 
 ## 程序入口 (Entry Point)
 <br/>
