@@ -32,18 +32,18 @@
 <br/> 
 
 ![iOS的RunLoop](./img/avi_thread_1_1.png)
-<h6 align = "center">[iOS] Looper&MessageQueue&Hanlder的关系图</h6>
+<h6 align = "center">[iOS] Thread和RunLoop的关系图</h6>
 
 <br/> 
 
 ![Android的Looper](./img/avi_thread_1_5.png)  
-<h6 align = "center">[Android] Looper&Hanlder&MessageQueue的关系图</h6>
+<h6 align = "center">[Android] Looper&Handler&MessageQueue的关系图</h6>
 
 
 它们的概念和思路是一样的，但具体的实现过程略有不同。
 
 
-对于iOS和Android,都规定了要更新UI只能在主线程中实现。UI的现实都是通过屏幕的不断刷帧，
+对于iOS和Android,都规定了要更新UI只能在主线程中实现。UI的显示都是通过屏幕的不断刷帧，
 
 说点细节的东西
 
@@ -94,7 +94,6 @@ public final class Message implements Parcelable {
   
     public Object obj;  
   
-  
     int flags;  
   
     long when;  
@@ -108,6 +107,9 @@ public final class Message implements Parcelable {
     // sometimes we store linked lists of these things  
     Message next;
 ```
+
+
+iOS多线程
 
 三种方式的优缺点介绍：
 
@@ -437,3 +439,15 @@ View的post方法来更新ui
 
 
 
+### Java 线程
+
+Thread class的suspend(),resume(),stop()方法被废弃，是因为 race condition(竞争条件)问题 。
+
+Runnable能将task的实现从执行此task的thread中分离出来。
+在Android的实际开发中一个多线程的操作很少使用Thread类，而是通过Runnable接口完成。Runnable适合于资源的共享。
+
+volatile仅能使用在变量级别；synchronized则可以使用在变量、方法、和类级别的。volatile本质是在告诉jvm当前变量在寄存器（工作内存）中的值是不确定的，需要从主存中读取；synchronized则是锁定当前变量，只有当前线程可以访问该变量，其他线程被阻塞住。
+
+synchronized关键字相当于在代码的前后加了lock.lock()和lock.unlock()方法。
+
+Java系统中的每一个对象都可以采用类似synchronized method这样的“等待-通知”机制。因为所有的对象都直接或间接地继承自Object class,所有所有对象也都是Object的instance。
